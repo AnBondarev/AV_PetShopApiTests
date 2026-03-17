@@ -55,11 +55,37 @@ public class testPet {
 
         Response response = step("Формирование запроса на изменение несуществующего Pet", () ->
                 given()
-                        .contentType((ContentType.JSON))
+                        .contentType(ContentType.JSON)
                         .header("Accept", "application/json")
                         .body(pet)
                         .when()
                         .put(BASE_URL + "/pet")
+        );
+
+        String responseBody = response.getBody().asString();
+
+        step("Проверка статус-кода ответа", () ->
+                assertEquals(404, response.getStatusCode(),
+                        "Код ответа не совпал с ожидаемым. Ответ: " + responseBody)
+        );
+
+        step("Проверка текста ответа", () ->
+                assertEquals("Pet not found", responseBody,
+                        "Текст ошибки не совпал с ожидаемым. Получен: " + responseBody)
+        );
+    }
+
+    @Test
+    @Feature("Pet")
+    @Severity(SeverityLevel.NORMAL)
+    @Owner("Андрей Бондарев")
+    public void testGetNonexistentPet() {
+        Response response = step("Формирование запроса на получение несуществующего Pet", () ->
+                given()
+                        .contentType(ContentType.JSON)
+                        .header("Accept", "application/json")
+                        .when()
+                        .get(BASE_URL + "/pet/9999")
         );
 
         String responseBody = response.getBody().asString();
