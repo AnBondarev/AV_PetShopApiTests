@@ -142,4 +142,34 @@ public class testPet {
                 }
         );
     }
+
+    @ParameterizedTest(name = "Добавление питомца с несуществующим статусом: {2}")
+    @CsvSource({
+            "203, Lavash, new"
+    })
+    @Feature("Pet")
+    @Severity(SeverityLevel.NORMAL)
+    @Owner("Андрей Бондарев")
+    public void testAddNewInvalidStatusPet(int id, String name, String status) {
+        Pet pet = new Pet();
+        pet.setId(id);
+        pet.setName(name);
+        pet.setStatus(status);
+
+        Response response = step("Формирование запроса на добавление нового Pet", () ->
+                given()
+                        .contentType(ContentType.JSON)
+                        .header("Accept", "application/json")
+                        .body(pet)
+                        .when()
+                        .post(BASE_URL + "/pet")
+        );
+
+        String responseBody = response.getBody().asString();
+
+        step("Проверка статус-кода ответа", () ->
+                assertEquals(400, response.getStatusCode(),
+                        "Код ответа не совпал с ожидаемым. Ответ: " + responseBody)
+        );
+    }
 }
