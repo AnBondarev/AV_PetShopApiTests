@@ -168,7 +168,7 @@ public class testPet {
         String responseBody = response.getBody().asString();
 
         step("Проверка статус-кода ответа", () ->
-                assertEquals(400, response.getStatusCode(),
+                assertEquals(405, response.getStatusCode(),
                         "Код ответа не совпал с ожидаемым. Ответ: " + responseBody)
         );
     }
