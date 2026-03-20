@@ -105,14 +105,15 @@ public class testPet {
 
     @ParameterizedTest(name = "Добавление питомца со статусом: {2}")
     @CsvSource({
-            "200, Kiwi, available",
-            "201, Buddy, pending",
-            "202, Garfield, sold"
+            "200, Kiwi, available, 200",
+            "201, Buddy, pending, 200",
+            "202, Garfield, sold, 200",
+            "203, Meow, new, 405"
     })
     @Feature("Pet")
     @Severity(SeverityLevel.NORMAL)
     @Owner("Андрей Бондарев")
-    public void testAddNewPet(int id, String name, String status) {
+    public void testAddNewPet(int id, String name, String status, int expectedStatus) {
         Pet pet = new Pet();
         pet.setId(id);
         pet.setName(name);
@@ -129,45 +130,20 @@ public class testPet {
 
         String responseBody = response.getBody().asString();
 
-        step("Проверка статус-кода ответа", () ->
-                assertEquals(200, response.getStatusCode(),
-                        "Код ответа не совпал с ожидаемым. Ответ: " + responseBody)
-        );
+        if (expectedStatus == 200) {
+            step("Проверка статус-кода ответа", () ->
+                    assertEquals(200, response.getStatusCode(),
+                            "Код ответа не совпал с ожидаемым. Ответ: " + responseBody)
+            );
 
-        step("Проверка параметров созданного питомца", () -> {
-                    Pet createdPet = response.as(Pet.class);
-                    assertEquals(pet.getId(), createdPet.getId(), "Id не совпадает с ожидаемым");
-                    assertEquals(pet.getName(), createdPet.getName(), "Name не совпадает с ожидаемым");
-                    assertEquals(pet.getStatus(), createdPet.getStatus(), "Status не совпадает с ожидаемым");
-                }
-        );
-    }
-
-    @ParameterizedTest(name = "Добавление питомца с несуществующим статусом: {2}")
-    @CsvSource({
-            "203, Lavash, new"
-    })
-    @Feature("Pet")
-    @Severity(SeverityLevel.NORMAL)
-    @Owner("Андрей Бондарев")
-    public void testAddNewInvalidStatusPet(int id, String name, String status) {
-        Pet pet = new Pet();
-        pet.setId(id);
-        pet.setName(name);
-        pet.setStatus(status);
-
-        Response response = step("Формирование запроса на добавление нового Pet", () ->
-                given()
-                        .contentType(ContentType.JSON)
-                        .header("Accept", "application/json")
-                        .body(pet)
-                        .when()
-                        .post(BASE_URL + "/pet")
-        );
-
-        String responseBody = response.getBody().asString();
-
-        step("Проверка статус-кода ответа", () ->
+            step("Проверка параметров созданного питомца", () -> {
+                        Pet createdPet = response.as(Pet.class);
+                        assertEquals(pet.getId(), createdPet.getId(), "Id не совпадает с ожидаемым");
+                        assertEquals(pet.getName(), createdPet.getName(), "Name не совпадает с ожидаемым");
+                        assertEquals(pet.getStatus(), createdPet.getStatus(), "Status не совпадает с ожидаемым");
+                    }
+            );
+        } else step("Проверка статус-кода ответа", () ->
                 assertEquals(405, response.getStatusCode(),
                         "Код ответа не совпал с ожидаемым. Ответ: " + responseBody)
         );
